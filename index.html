@@ -5,22 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pagination et Chargement Progressif</title>
     <!-- Framework CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
         }
         .card {
             margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: scale(1.02);
+        }
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .card-text {
+            font-size: 1rem;
+            color: #6c757d;
         }
         #loading {
             text-align: center;
             display: none;
             margin: 20px 0;
         }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        .pagination {
+            justify-content: center;
+        }
+        .page-item.active .page-link {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .page-link {
+            color: #007bff;
+        }
+        .page-link:hover {
+            color: #0056b3;
+        }
+        header {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+        .form-control {
+            border-radius: 5px;
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Bienvenue sur notre site</h1>
+    </header>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Liste des Produits</h1>
         <div id="product-container" class="row">
@@ -39,6 +100,9 @@
             </ul>
         </nav>
     </div>
+    <footer>
+        <p>&copy; 2024 ToroSociety. Tous droits réservés.</p>
+    </footer>
 
     <!-- Bibliothèques JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
