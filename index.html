@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagination et Chargement Progressif</title>
+    <!-- Framework CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        #loading {
+            text-align: center;
+            display: none;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Liste des Produits</h1>
+        <div id="product-container" class="row">
+            <!-- Les produits seront chargés dynamiquement ici -->
+        </div>
+        <!-- Spinner de chargement pour le défilement infini -->
+        <div id="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+        </div>
+        <!-- Contrôles de pagination -->
+        <nav aria-label="Page navigation" id="pagination-container" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <!-- Les boutons de pagination seront générés dynamiquement -->
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Bibliothèques JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const productContainer = document.getElementById('product-container');
+        const paginationContainer = document.querySelector('#pagination-container .pagination');
+        const loadingSpinner = document.getElementById('loading');
+        let currentPage = 1;
+        const productsPerPage = 20;
+        let isLoading = false;
+
+        // Fonction pour récupérer les produits depuis le backend
+        async function fetchProducts(page) {
+            isLoading = true;
+            loadingSpinner.style.display = 'block';
+
+            const response = await fetch(`get_products.php?limit=${productsPerPage}&offset=${(page - 1) * productsPerPage}`);
+            const products = await response.json();
+            return products;
+        }
+
+        // Fonction pour afficher les produits dans le DOM
+        function renderProducts(products) {
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.classList.add('col-md-3');
+                productCard.innerHTML = `
+                    <div class="card h-100">
+                        <img src="${product.image_url}" class="card-img-top" alt="${product.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.name}</h5>
+                            <p class="card-text">${product.description}</p>
+                            <p class="text-primary">${product.price} €</p>
+                        </div>
+                    </div>
+                `;
+                productContainer.appendChild(productCard);
+            });
+        }
+
+        // Fonction pour afficher les contrôles de pagination
+        function renderPagination(totalPages) {
+            paginationContainer.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const pageItem = document.createElement('li');
+                pageItem.classList.add('page-item');
+                if (i === currentPage) pageItem.classList.add('active');
+                pageItem.innerHTML = `
+                    <a href="#" class="page-link" data-page="${i}">${i}</a>
+                `;
+                paginationContainer.appendChild(pageItem);
+            }
+        }
+
+        // Fonction pour charger les produits avec pagination
+        async function loadPaginatedProducts(page) {
+            currentPage = page;
+            productContainer.innerHTML = '';
+            const products = await fetchProducts(page);
+            renderProducts(products);
+            isLoading = false;
+            loadingSpinner.style.display = 'none';
+        }
+
+        // Fonction pour le chargement progressif (infinite scroll)
+        async function loadInfiniteProducts() {
+            if (isLoading) return;
+            const products = await fetchProducts(currentPage);
+            renderProducts(products);
+            isLoading = false;
+            loadingSpinner.style.display = 'none';
+            currentPage++;
+        }
+
+        // Écouteurs d'événements
+        paginationContainer.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                const page = parseInt(e.target.dataset.page);
+                loadPaginatedProducts(page);
+            }
+        });
+
+        // Écouteur d'événement pour le défilement infini
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50) {
+                loadInfiniteProducts();
+            }
+        });
+
+        // Initialisation avec pagination
+        async function init() {
+            const totalProducts = 1000; // Simuler le nombre total de produits dans la base de données
+            const totalPages = Math.ceil(totalProducts / productsPerPage);
+            renderPagination(totalPages);
+            loadPaginatedProducts(1);
+        }
+
+        init();
+    </script>
+</body>
+</html>
